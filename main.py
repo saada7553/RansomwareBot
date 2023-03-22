@@ -2,6 +2,8 @@ import pyautogui
 import time
 import pyperclip
 import pandas
+import webbrowser
+
 
 cleaned_data = []
 interest = {}
@@ -18,15 +20,12 @@ def build_database() -> ():
 
 
 def scrape(num_to_scrape: int) -> ():
-    print("Move the mouse to the starting position and press enter to continue...")
-    input()
+    webbrowser.open('https://twitter.com/RansomwareNews')
     time.sleep(5)
-    start_x, start_y = pyautogui.position()
-
     while len(originals) < num_to_scrape:
         with open('tweets.txt', 'w', encoding='utf-8') as f:
             f.write('')
-        pyautogui.moveTo(start_x, start_y)
+        pyautogui.moveTo(500, 500)
         pyautogui.scroll(-2250)
         time.sleep(0.5)
         pyautogui.hotkey('ctrl', 'a')
@@ -35,6 +34,7 @@ def scrape(num_to_scrape: int) -> ():
         with open('tweets.txt', 'a', encoding='utf-8') as f:
             f.write(pyperclip.paste() + '\n\n')
         clean_tweets()
+    pyautogui.hotkey('ctrl', 'w')
 
 
 def remove_suffix(stringin: str) -> str:
