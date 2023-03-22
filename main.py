@@ -8,15 +8,7 @@ import webbrowser
 cleaned_data = []
 interest = {}
 originals = {}
-
-def build_database() -> ():
-    df = pandas.read_csv("RansomwareData.csv")
-    with open("items.txt", "w", encoding="utf-8") as f_out:
-        f_out.write("\n".join(df["Title Name"]))
-        for index, row in df.iterrows():
-            currURL = str(row["Victim Public URL"])
-            f_out.write(currURL)
-            f_out.write("\n")
+df = pandas.read_csv("RansomwareData.csv")
 
 
 def scrape(num_to_scrape: int) -> ():
@@ -79,16 +71,17 @@ def clean_tweets() -> ():
 
 
 def clean_data() -> ():
-    items_file = open("items.txt", "r", encoding="utf8")
-    entries = items_file.readlines()
-    items_file.close()
-    for entry in entries:
+    for index, row in df.iterrows():
         output = ""
-        for char in entry:
+        for char in row['Title Name']:
             if char != "[" and char != "]" and char != " ":
                 output += char
         cleaned_data.append(output.lower())
-
+        row['Victim Public URL'] = str(row['Victim Public URL'])
+        for char in row['Victim Public URL']:
+            if char != "[" and char != "]" and char != " ":
+                output += char
+        cleaned_data.append(output.lower())
 
 def find_matches() -> ():
     non_matches = []
@@ -104,7 +97,6 @@ def find_matches() -> ():
             non_matches.append(key)
 
 def main() -> ():
-    build_database()
     response = input("Scrape new posts from Twitter? Enter Y/N").lower()
     if response == "y":
         num = input("Enter minimum number of posts to collect: ")
