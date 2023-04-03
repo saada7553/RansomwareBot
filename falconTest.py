@@ -5,7 +5,7 @@ import pandas as pd
 import spacy
 import webbrowser
 import testString
-import  main
+import main
 
 
 cleaned_data = []
@@ -120,3 +120,4 @@ def find_falcon_matches():
             print(f'Attacker: {falcon_hash[entry][0]} \nVictims: {no_match}')
 
 find_falcon_matches()
+print(cleaned_data)
