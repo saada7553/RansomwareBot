@@ -1,15 +1,11 @@
-import pyautogui
-import time
-import pyperclip
 import pandas as pd
 import spacy
-import webbrowser
 import testString
 import main
 
 
 cleaned_data = []
-dataframe = pd.read_csv("RansomwareData.csv")
+dataframe = pd.read_csv("../VictimAttacker Data/RansomwareData.csv")
 def refang_database() -> ():
     for index, row in dataframe.iterrows():
         output = ""

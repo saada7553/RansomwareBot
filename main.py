@@ -3,6 +3,7 @@ import time
 import pyperclip
 import pandas
 import webbrowser
+from thefuzz import fuzz
 
 # Stores RansomwareData.csv data after strings have been processed. Basically a list of every victim we know
 # from the sheet.
@@ -16,7 +17,7 @@ victims = {}
 pre_vs_post_data_cleaning = {}
 
 # Open the manually downloaded/new version of the victim tracking sheet
-dataframe = pandas.read_csv("RansomwareData.csv")
+dataframe = pandas.read_csv("VictimAttacker Data/RansomwareData.csv")
 
 
 def download_ransomware_news_tweets(num_to_scrape: int) -> ():
@@ -29,7 +30,7 @@ def download_ransomware_news_tweets(num_to_scrape: int) -> ():
     webbrowser.open('https://twitter.com/RansomwareNews')
     time.sleep(5)
     while len(pre_vs_post_data_cleaning) < num_to_scrape:
-        with open('tweets.txt', 'w', encoding='utf-8') as f:
+        with open('VictimAttacker Data/tweets.txt', 'w', encoding='utf-8') as f:
             f.write('')  # Clears the text file from when it was used last
         pyautogui.moveTo(500, 500)
         pyautogui.scroll(-2250)  # Can be adjusted if you want to scroll further
@@ -37,7 +38,7 @@ def download_ransomware_news_tweets(num_to_scrape: int) -> ():
         pyautogui.hotkey('ctrl', 'a')
         pyautogui.hotkey('ctrl', 'c')
         time.sleep(0.75)
-        with open('tweets.txt', 'a', encoding='utf-8') as f:
+        with open('VictimAttacker Data/tweets.txt', 'a', encoding='utf-8') as f:
             f.write(pyperclip.paste() + '\n\n')
         process_ransomware_news_tweets()  # Process and store data before the file gets overwritten in the next loop
     pyautogui.hotkey('ctrl', 'w')  # Close browser
@@ -75,7 +76,7 @@ def process_ransomware_news_tweets() -> ():
     Twitter account since the posts are always the same and NLP would run slower.
     :return:
     """
-    data = open("tweets.txt", "r", encoding="utf8")
+    data = open("VictimAttacker Data/tweets.txt", "r", encoding="utf8")
     link_flag = False  # This boolean has to do with a weird quirk based on how this specific Twitter Bot posts.
     group = ""
 
@@ -123,7 +124,7 @@ def refang_database() -> ():
             if char != "[" and char != "]" and char != " ":
                 output += char
         output = output.lower()
-        output = output.split('victim')[1]  # In sheet: 'x Ransomware Group Victim x' This removes text before 'victim'
+        # output = output.split('victim')[1]  # In sheet: 'x Ransomware Group Victim x' This removes text before 'victim'
         cleaned_data.append(output)
 
         output = ''
@@ -141,7 +142,9 @@ def find_matches() -> ():
         found = False
         original_key = pre_vs_post_data_cleaning[key]
         for entry in cleaned_data:
-            if key in entry:
+            similarity_score = fuzz.token_set_ratio(entry, key)
+            if similarity_score > 80:
+            #  if key in entry:
                 found = True
                 break
         if not found and key not in non_matches:
