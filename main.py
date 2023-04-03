@@ -6,15 +6,15 @@ import webbrowser
 
 
 cleaned_data = []
-interest = {}
-originals = {}
-df = pandas.read_csv("RansomwareData.csv")
+victims = {}
+pre_vs_post_data_cleaning = {}
+dataframe = pandas.read_csv("RansomwareData.csv")
 
 
-def scrape(num_to_scrape: int) -> ():
+def download_ransomware_news_tweets(num_to_scrape: int) -> ():
     webbrowser.open('https://twitter.com/RansomwareNews')
     time.sleep(5)
-    while len(originals) < num_to_scrape:
+    while len(pre_vs_post_data_cleaning) < num_to_scrape:
         with open('tweets.txt', 'w', encoding='utf-8') as f:
             f.write('')
         pyautogui.moveTo(500, 500)
@@ -25,11 +25,11 @@ def scrape(num_to_scrape: int) -> ():
         time.sleep(0.75)
         with open('tweets.txt', 'a', encoding='utf-8') as f:
             f.write(pyperclip.paste() + '\n\n')
-        clean_tweets()
+        process_ransomware_news_tweets()
     pyautogui.hotkey('ctrl', 'w')
 
 
-def remove_suffix(stringin: str) -> str:
+def remove_website_suffix(stringin: str) -> str:
     suffixlst = [".au", ".in", ".br", ".it", ".ca", ".mx", ".fr", ".tw", ".il", ".uk",
                  ".com", ".co", ".edu", ".gov", ".org", ".mil", ".net", '"', "/"]
     stringin = stringin.lower()
@@ -38,20 +38,26 @@ def remove_suffix(stringin: str) -> str:
     return stringin
 
 
-def clean_tweets() -> ():
-    data = open("tweets.txt", "r", encoding="utf8")
+def remove_website_prefix(stringin: str) -> str:
     disregard = ["https://", "http://", "https://www.", "http://www.", "www."]
+    for item in disregard:
+        if item in stringin:
+            stringin = stringin.replace(item, "")
+    return stringin
+
+
+def process_ransomware_news_tweets() -> ():
+    data = open("tweets.txt", "r", encoding="utf8")
     link_flag = False
     group = ""
 
     def string_processing(input):
-        string = remove_suffix(input)
-        for item in disregard:
-            if item in string:
-                string = string.replace(item, "")
-        originals[string.replace(" ", "")] = string
+        string = remove_website_suffix(input)
+        string = remove_website_prefix(string)
+        pre_vs_post_data_cleaning[string.replace(" ", "")] = string
         string = string.replace(" ", "")
-        interest[string.lower()] = group
+        string = string.split("(", 1)[0]
+        victims[string.lower()] = group
 
     for index, line in enumerate(data):
         if line[0:7] == "Group: ":
@@ -70,8 +76,8 @@ def clean_tweets() -> ():
     data.close()
 
 
-def clean_data() -> ():
-    for index, row in df.iterrows():
+def refang_database() -> ():
+    for index, row in dataframe.iterrows():
         output = ""
         for char in row['Title Name']:
             if char != "[" and char != "]" and char != " ":
@@ -83,11 +89,12 @@ def clean_data() -> ():
                 output += char
         cleaned_data.append(output.lower())
 
+#TODO: implement partial string matching
 def find_matches() -> ():
     non_matches = []
-    for key, value in interest.items():
+    for key, value in victims.items():
         found = False
-        original_key = originals[key]
+        original_key = pre_vs_post_data_cleaning[key]
         for entry in cleaned_data:
             if key in entry:
                 found = True
@@ -95,17 +102,19 @@ def find_matches() -> ():
         if not found and key not in non_matches:
             print(f"{value}: {original_key}")
             non_matches.append(key)
+    if len(non_matches) == 0:
+        print('No Missing Items Discovered')
 
 def main() -> ():
     response = input("Scrape new posts from Twitter? Enter Y/N").lower()
     if response == "y":
         num = input("Enter minimum number of posts to collect: ")
-        scrape(int(num))
+        download_ransomware_news_tweets(int(num))
     else:
-        clean_tweets()
-    clean_data()
+        process_ransomware_news_tweets()
+    refang_database()
     print("---------------------------------------")
-    print(f"Total Tweets Searched: {len(interest)}")
+    print(f"Total Tweets Searched: {len(victims)}")
     print("POSSIBLE MISSING ITEMS:")
     print("---------------------------------------")
     find_matches()
