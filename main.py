@@ -17,7 +17,7 @@ victims = {}
 pre_vs_post_data_cleaning = {}
 
 # Open the manually downloaded/new version of the victim tracking sheet
-dataframe = pandas.read_csv("VictimAttacker Data/RansomwareData.csv")
+dataframe = pandas.read_csv("VictimAttacker Data/Ransomware Victim Tracking - Targets_Victims.csv")
 
 
 def download_ransomware_news_tweets(num_to_scrape: int) -> ():
@@ -58,16 +58,16 @@ def remove_website_suffix(string_in: str) -> str:
     return string_in
 
 
-def remove_website_prefix(stringin: str) -> str:
+def remove_website_prefix(string_in: str) -> str:
     """
     The prefix can vary from the Tweet to what we have stored in the sheet, so it's best to remove it to reduce false
     negative matches.
     """
     disregard = ["https://", "http://", "https://www.", "http://www.", "www."]
     for item in disregard:
-        if item in stringin:
-            stringin = stringin.replace(item, "")
-    return stringin
+        if item in string_in:
+            string_in = string_in.replace(item, "")
+    return string_in
 
 
 def process_ransomware_news_tweets() -> ():
@@ -120,11 +120,12 @@ def refang_database() -> ():
     for index, row in dataframe.iterrows():
         output = ''
         for char in row['Title Name']:
-            # TODO: Rewrite this to only allow a-z characters instead on only omitting spaces & sqaure brackets
+            # TODO: Rewrite this to only allow a-z characters instead on only omitting spaces & square brackets
             if char != "[" and char != "]" and char != " ":
                 output += char
         output = output.lower()
-        # output = output.split('victim')[1]  # In sheet: 'x Ransomware Group Victim x' This removes text before 'victim'
+        if 'victim' in output:
+            output = output.split('victim')[1]  # In sheet: 'x Ransomware Group Victim x'. Removes text before 'victim'
         cleaned_data.append(output)
 
         output = ''
@@ -135,16 +136,20 @@ def refang_database() -> ():
         cleaned_data.append(output.lower())
 
 
-# TODO: implement partial string matching
 def find_matches() -> ():
+    """
+    Uses fuzzy string matching, since the name from Twitter and the name in the sheet may be a little differently
+    formatted. Increase the similarity_score threshold to make the script more strict, but this may increase false
+    positives (cases where the program reports that a certain victim is not present in the sheet, when in reality
+    it is present)
+    """
     non_matches = []
     for key, value in victims.items():
         found = False
         original_key = pre_vs_post_data_cleaning[key]
         for entry in cleaned_data:
-            similarity_score = fuzz.token_set_ratio(entry, key)
-            if similarity_score > 80:
-            #  if key in entry:
+            similarity_score = fuzz.token_set_ratio(key, entry)
+            if similarity_score > 80:  # Increase threshold here to make program more strict
                 found = True
                 break
         if not found and key not in non_matches:
