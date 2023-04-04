@@ -153,7 +153,7 @@ def process_ransomware_news_tweets(acct: str, scraped_data='') -> ():
             doc = nlp(tweet)
             words = tweet.split(' ')
             falcon_victim_names = []
-            attacker = 'NLP ERROR'
+            attacker = 'ERROR'
             for ent in doc.ents:
                 if ent.label_ == 'PERSON' or ent.label_ == 'ORG' and str(ent).lower() not in attackers:
                     falcon_victim_names.append(ent.text)
