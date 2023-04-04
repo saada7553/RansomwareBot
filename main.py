@@ -40,6 +40,7 @@ attackers = ['Lockbit', 'BianLian', 'Endurance', 'Relic', 'Yanluowang', 'Monti',
 attackers = [x.lower() for x in attackers]
 attackers = set(attackers)
 
+
 def download_ransomware_news_tweets(num_to_scrape: int, acct) -> ():
     """
     Opens browser, moves mouse out of the way, copies posts until enough tweets have been collected. Note that
@@ -122,12 +123,12 @@ def process_ransomware_news_tweets(acct: str, scraped_data='') -> ():
         stringin = stringin.lower()
         return stringin
 
-    def process_falcon_url(word: str) -> str:
-        word = word.split(',')[0]
-        if '(' in word:
-            tempL = word.split('(')
-            word = tempL[1].split(')')[0]
-        return word
+    def process_falcon_url(url_in: str) -> str:
+        url_in = url_in.split(',')[0]
+        if '(' in url_in:
+            temp_l = url_in.split('(')
+            url_in = temp_l[1].split(')')[0]
+        return url_in
 
     def string_processing(inpt):
         """
@@ -174,7 +175,6 @@ def process_ransomware_news_tweets(acct: str, scraped_data='') -> ():
     data = open("VictimAttacker Data/tweets.txt", "r", encoding="utf8")
     link_flag = False  # This boolean has to do with a weird quirk based on how this specific Twitter Bot posts.
     group = ""
-
 
     # String processing specific to @RansomwareNews bot. Will not work with other Twitter accounts
     # TODO: Implement regular expression matching instead of this mess
