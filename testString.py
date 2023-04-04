@@ -1,4 +1,4 @@
-testString = '''To view keyboard shortcuts, press question mark
+testString = """To view keyboard shortcuts, press question mark
 View keyboard shortcuts
 FalconFeedsio
 2,117 Tweets
@@ -1161,4 +1161,5 @@ Cookie Policy
 Accessibility
 Ads info
 More
-© 2023 Twitter, Inc.'''
+© 2023 Twitter, Inc.
+"""
